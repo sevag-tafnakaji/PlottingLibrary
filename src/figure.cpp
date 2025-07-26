@@ -1,12 +1,15 @@
 #include "figure.h"
 
 
-Figure::Figure()
+Figure::Figure(std::string title, bool fullscreen, int height, int width)
 {
-    this->init();
+    this->SCR_WIDTH = width;
+    this->SCR_HEIGHT = height;
+
+    this->init(title, fullscreen);
 }
 
-void Figure::init()
+void Figure::init(std::string title, bool fullscreen)
 {
     // glfw: initialize and configure
     // ------------------------------
@@ -17,7 +20,10 @@ void Figure::init()
 
     // glfw window creation
     // --------------------
-    this->window = glfwCreateWindow(this->SCR_WIDTH, this->SCR_HEIGHT, "Plotter", NULL, NULL);
+    if (fullscreen)
+        this->window = glfwCreateWindow(this->SCR_WIDTH, this->SCR_HEIGHT, title.c_str(), glfwGetPrimaryMonitor(), NULL);
+    else
+        this->window = glfwCreateWindow(this->SCR_WIDTH, this->SCR_HEIGHT, title.c_str(), NULL, NULL);
     if (this->window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;

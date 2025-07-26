@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <chrono>
+#include <string>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
@@ -13,7 +14,7 @@ void processInput(GLFWwindow *window);
 class Figure
 {
 public:
-    Figure();
+    Figure(std::string title = "Plotter", bool fullscreen = false, int height = 600, int width = 800);
     ~Figure();
 
     void render();
@@ -25,8 +26,8 @@ private:
 
     // pointer to figure window
     GLFWwindow *window;
-
-    void init();
+    
+    void init(std::string title, bool fullscreen);
 };
 
 

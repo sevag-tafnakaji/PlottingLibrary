@@ -2,7 +2,7 @@
 
 int main()
 {
-    Figure testFigure;
+    Figure testFigure{"Test Figure", false, 1080, 1920};
 
     testFigure.render();
 }
