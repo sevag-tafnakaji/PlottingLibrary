@@ -1,7 +1,7 @@
-#include "figure.h"
+#include <Plotter/Plotter.h>
 
 
-Figure::Figure(std::string title, bool fullscreen, int height, int width)
+Plotter::Plotter(std::string title, bool fullscreen, int height, int width)
 {
     this->SCR_WIDTH = width;
     this->SCR_HEIGHT = height;
@@ -9,7 +9,7 @@ Figure::Figure(std::string title, bool fullscreen, int height, int width)
     this->init(title, fullscreen);
 }
 
-void Figure::init(std::string title, bool fullscreen)
+void Plotter::init(std::string title, bool fullscreen)
 {
     // glfw: initialize and configure
     // ------------------------------
@@ -43,7 +43,7 @@ void Figure::init(std::string title, bool fullscreen)
 
 }
 
-void Figure::render()
+void Plotter::render()
 {
         auto start = std::chrono::high_resolution_clock::now();
 
@@ -75,7 +75,7 @@ void Figure::render()
     }
 }
 
-Figure::~Figure(){}
+Plotter::~Plotter(){}
 
 // // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // // ---------------------------------------------------------------------------------------------------------
