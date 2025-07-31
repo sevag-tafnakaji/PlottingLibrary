@@ -59,7 +59,9 @@ generate_export_header(Plotter EXPORT_FILE_NAME include/Plotter/${export_file_na
 set(sources
     include/Plotter/export.h
     include/Plotter/Plotter.h
+    include/Plotter/data.h
     src/Plotter.cpp
+    src/data.cpp
     src/glad.c)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 
