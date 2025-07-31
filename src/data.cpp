@@ -11,8 +11,8 @@ void Data2D::setData(std::vector<double> x, std::vector<double> y)
 {
     if (Data2D::checkDataSizes(x, y))
     {
-        X = x;
-        Y = y;
+        setX(x);
+        setY(y);
     }else
     {
         throw IncompatibleSize("X and Y are of different sizes");

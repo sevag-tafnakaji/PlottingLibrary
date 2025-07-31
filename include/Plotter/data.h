@@ -30,6 +30,14 @@ public:
 
     void setData(std::vector<double> x, std::vector<double> y);
 
+    std::vector<double> getX() {return X;}
+
+    std::vector<double> getY() {return Y;}
+
+    void setX(std::vector<double> x) {X = x;}
+
+    void setY(std::vector<double> y) {Y = y;}
+
 private:
     std::vector<double> X;
     std::vector<double> Y;

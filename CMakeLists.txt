@@ -160,9 +160,3 @@ if(PLOTTER_BUILD_DOCS)
     find_package(Doxygen REQUIRED)
     doxygen_add_docs(docs include)
 endif()
-
-# include_directories(include libraries)
-
-# add_subdirectory(src) 
-
-# add_subdirectory(examples)
