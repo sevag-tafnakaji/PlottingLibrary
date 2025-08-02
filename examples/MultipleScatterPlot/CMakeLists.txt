@@ -1,0 +1,20 @@
+cmake_minimum_required(VERSION 3.17)
+project(Plotter-MultipleScatterPlot LANGUAGES CXX)
+
+include("../../cmake/utils.cmake")
+string(COMPARE EQUAL "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}" is_top_level)
+
+if(is_top_level)
+    find_package(Plotter REQUIRED)
+endif()
+
+set(sources main.cpp)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
+
+add_executable(Plotter-MultipleScatterPlot)
+target_sources(Plotter-MultipleScatterPlot PRIVATE ${sources})
+target_link_libraries(Plotter-MultipleScatterPlot PUBLIC glfw GL dl PRIVATE Plotter::Plotter)
+
+if(NOT is_top_level)
+    win_copy_deps_to_target_dir(Plotter-MultipleScatterPlot Plotter::Plotter)
+endif()

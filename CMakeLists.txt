@@ -61,12 +61,14 @@ set(sources
     include/Plotter/Plotter.h
     include/Plotter/data.h
     include/Plotter/line.h
+    include/Plotter/scatter.h
     include/Plotter/resource_manager.h
     include/Plotter/shader.h
     include/Plotter/utils.h
     src/Plotter.cpp
     src/data.cpp
     src/line.cpp
+    src/scatter.cpp
     src/resource_manager.cpp
     src/shader.cpp
     src/glad.c)

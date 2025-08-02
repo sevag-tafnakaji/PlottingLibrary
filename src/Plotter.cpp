@@ -42,7 +42,7 @@ void Plotter::init(std::string title, bool fullscreen)
         std::cout << "Failed to initialize GLAD" << std::endl;
         // TODO: Raise some custom failed init error
     }
-    glViewport(FIGURE_MARGIN + TICK_SIZE, FIGURE_MARGIN + TICK_SIZE, SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);
+    glViewport(FIGURE_MARGIN + TICK_SIZE, FIGURE_MARGIN + TICK_SIZE, SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);    
     glDisable(GL_SCISSOR_TEST);
 
     Shader PlotterShader = ResourceManager::LoadShader("../resources/shaders/plot.vs", "../resources/shaders/plot.fs", nullptr, "plotter");
@@ -56,6 +56,13 @@ void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colou
     Line line(x, y, colour);
 
     plotLines.push_back(line);
+}
+
+void Plotter::scatter(std::vector<double> x, std::vector<double> y)
+{
+    Scatter scatter(x, y);
+
+    scatterPlots.push_back(scatter);
 }
 
 void Plotter::render()
@@ -281,6 +288,26 @@ void Plotter::extractMinMaxValues()
         if (*yMinMax.second > yMax)
             yMax = *yMinMax.second;
     }
+
+    for (Scatter s : scatterPlots)
+    {
+        std::vector<double> x = s.getX();
+        std::vector<double> y = s.getY();
+        auto xMinMax = std::minmax_element(x.begin(), x.end());
+        auto yMinMax = std::minmax_element(y.begin(), y.end());
+
+        if (*xMinMax.first < xMin)
+            xMin = *xMinMax.first;
+
+        if (*xMinMax.second > xMax)
+            xMax = *xMinMax.second;
+
+        if (*yMinMax.first < yMin)
+            yMin = *yMinMax.first;
+
+        if (*yMinMax.second > yMax)
+            yMax = *yMinMax.second;
+    }
 }
 
 void Plotter::loadDataToBuffers()
@@ -290,6 +317,15 @@ void Plotter::loadDataToBuffers()
         RenderData data = line.loadDataToBuffers(xMin, xMax, yMin, yMax, 
                                                  -1.0, 1.0, -1.0, 1.0,
                                                  GL_LINE_STRIP);
+
+        updateBuffers(data);
+    }
+
+    for (Scatter scatter : scatterPlots)
+    {
+        RenderData data = scatter.loadDataToBuffers(xMin, xMax, yMin, yMax, 
+                                                    -1.0, 1.0, -1.0, 1.0,
+                                                    GL_POINTS);
 
         updateBuffers(data);
     }

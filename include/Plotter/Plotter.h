@@ -15,6 +15,7 @@
 #include <GLFW/glfw3.h>
 
 #include <Plotter/line.h>
+#include <Plotter/scatter.h>
 #include <Plotter/resource_manager.h>
 
 #define SCALE_VALUE 1.05
@@ -37,6 +38,8 @@ public:
 
     void plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
 
+    void scatter(std::vector<double> x, std::vector<double> y);
+
 private:
     // settings
     int SCR_WIDTH = 800;
@@ -52,6 +55,8 @@ private:
 
     // Lines to plot
     std::vector<Line> plotLines;
+
+    std::vector<Scatter> scatterPlots;
 
     // All VAOs (data, axes, grids, etc) + data related to drawing lines as desired
     std::vector<RenderData> VAOs;

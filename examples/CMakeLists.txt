@@ -2,4 +2,6 @@
 add_subdirectory(SimpleWindow)
 add_subdirectory(LoadData)
 add_subdirectory(SingleLinePlot)
+add_subdirectory(SingleScatterPlot)
 add_subdirectory(MultipleLinePlot)
+add_subdirectory(MultipleScatterPlot)

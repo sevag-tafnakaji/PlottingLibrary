@@ -45,6 +45,8 @@ public:
 
     static Data2D scaleData(Data2D data, double xMin, double xMax, double yMin, double yMax, 
                     double minWidth, double maxWidth, double minHeight, double maxHeight);
+    
+    static void convertToArray(Data2D data, float* array);
 
 private:
     std::vector<double> X;

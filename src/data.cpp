@@ -54,4 +54,18 @@ Data2D Data2D::scaleData(Data2D data, double xMin, double xMax, double yMin, dou
     return Data2D(scaledX, scaledY);
 }
 
+void Data2D::convertToArray(Data2D data, float* array)
+{
+    int dataSize = data.size();
+    std::vector<double> x = data.getX();
+    std::vector<double> y = data.getY();
+    int j = 0;
+    for (int i = 0; i < (int)(dataSize * 2); i += 2)
+    {
+        array[i] = (float)x[j];
+        array[i + 1] = (float)y[j];
+        j++;
+    }
+}
+
 Data2D::~Data2D() {}
