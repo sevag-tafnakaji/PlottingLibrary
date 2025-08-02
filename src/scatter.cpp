@@ -2,9 +2,11 @@
 
 Scatter::Scatter() {}
 
-Scatter::Scatter(std::vector<double> x, std::vector<double> y)
+Scatter::Scatter(std::vector<double> x, std::vector<double> y, float size, glm::vec3 colour)
 {
     this->data.setData(x, y);
+    pointSize = size;
+    pointColour = colour;
 }
 
 Scatter::~Scatter() {}
@@ -39,5 +41,5 @@ RenderData Scatter::loadDataToBuffers(double xMin, double xMax, double yMin, dou
     glEnableVertexAttribArray(0);
 
     // magic number are colours. TODO: Add colours later on.
-    return RenderData{VAO, dataSize, {1.0f, 1.0f, 1.0f}, mode};
+    return RenderData{VAO, dataSize, pointColour, pointSize, mode};
 }

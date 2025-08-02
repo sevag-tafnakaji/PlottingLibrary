@@ -10,7 +10,7 @@ class Scatter
 {
 public:
     Scatter();
-    Scatter(std::vector<double> x, std::vector<double> y);
+    Scatter(std::vector<double> x, std::vector<double> y, float size = 1.0f, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
     ~Scatter();
 
     void setData(std::vector<double> x, std::vector<double> y);
@@ -30,6 +30,8 @@ public:
 private:
     Data2D data;
 
+    float pointSize;
+    glm::vec3 pointColour;
 };
 
 #endif  // SCATTER_H

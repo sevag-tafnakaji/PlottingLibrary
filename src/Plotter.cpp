@@ -45,7 +45,11 @@ void Plotter::init(std::string title, bool fullscreen)
     glViewport(FIGURE_MARGIN + TICK_SIZE, FIGURE_MARGIN + TICK_SIZE, SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);    
     glDisable(GL_SCISSOR_TEST);
 
-    Shader PlotterShader = ResourceManager::LoadShader("../resources/shaders/plot.vs", "../resources/shaders/plot.fs", nullptr, "plotter");
+    glEnable(GL_POINT_SPRITE);
+    glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
+    ResourceManager::LoadShader("../resources/shaders/line.vs", "../resources/shaders/line.fs", nullptr, "linePlotter");
+    ResourceManager::LoadShader("../resources/shaders/scatter.vs", "../resources/shaders/scatter.fs", nullptr, "scatterPlotter");
 }
 
 void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour)
@@ -58,9 +62,12 @@ void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colou
     plotLines.push_back(line);
 }
 
-void Plotter::scatter(std::vector<double> x, std::vector<double> y)
+void Plotter::scatter(std::vector<double> x, std::vector<double> y, float pointSize, glm::vec3 colour)
 {
-    Scatter scatter(x, y);
+    if (glm::all(glm::equal(colour, {0.0f, 0.0f, 0.0f})))
+        colour = {glm::linearRand<float>(0, 1), glm::linearRand<float>(0, 1), glm::linearRand<float>(0, 1)};
+
+    Scatter scatter(x, y, pointSize, colour);
 
     scatterPlots.push_back(scatter);
 }
@@ -95,12 +102,12 @@ void Plotter::render()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Activate the current shader
-        Shader shader = ResourceManager::GetShader("plotter");
+        Shader lineShader = ResourceManager::GetShader("linePlotter");
 
-        shader.Use();
+        lineShader.Use();
 
         // Update zoom + pan with values from processInput
-        GLint transformLocation = glGetUniformLocation(shader.ID, "transform");
+        GLint transformLocation = glGetUniformLocation(lineShader.ID, "transform");
         transform = viewportTransform(FIGURE_MARGIN + TICK_SIZE, 
                                        FIGURE_MARGIN + TICK_SIZE, 
                                        SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, 
@@ -111,7 +118,18 @@ void Plotter::render()
         // plot all of the active buffers
         for (RenderData renderBuffers : activeVAOs)
         {
-            shader.SetVector3f("colour", renderBuffers.colour, false);
+            if (renderBuffers.mode == GL_POINTS)
+            {
+                Shader scatterShader = ResourceManager::GetShader("scatterPlotter");
+                scatterShader.Use();
+
+                glUniformMatrix4fv(glGetUniformLocation(scatterShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transform)); 
+                glUniform1f(glGetUniformLocation(scatterShader.ID, "pointSize"), renderBuffers.pointSize); 
+                scatterShader.SetVector3f("colour", renderBuffers.colour, false);
+            }
+            else
+                lineShader.Use();
+                lineShader.SetVector3f("colour", renderBuffers.colour, false);
             glBindVertexArray(renderBuffers.VAO);
             glDrawArrays(renderBuffers.mode, 0, renderBuffers.bufferSize);
         }
@@ -149,7 +167,7 @@ void Plotter::plotAxes()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    updateBuffers(RenderData{VAO, 3, glm::vec3(1.0f, 1.0f, 1.0f), GL_LINE_STRIP});
+    updateBuffers(RenderData{VAO, 3, glm::vec3(1.0f, 1.0f, 1.0f), -1.0, GL_LINE_STRIP});
 }
 
 // TODO: use generalised values instead of magic numbers
@@ -211,7 +229,7 @@ void Plotter::plotTicks()
     glEnableVertexAttribArray(0);
 
     // magic number are colours. TODO: Add colours later on.
-    updateBuffers(RenderData{VAOX, nTicksX * 4, {1.0f, 1.0f, 1.0f}, GL_LINES});
+    updateBuffers(RenderData{VAOX, nTicksX * 4, {1.0f, 1.0f, 1.0f}, -1.0f, GL_LINES});
 
     /*
     ---------------------
@@ -263,7 +281,7 @@ void Plotter::plotTicks()
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
-    updateBuffers(RenderData{VAOY, nTicksY * 4, {1.0f, 1.0f, 1.0f}, GL_LINES});
+    updateBuffers(RenderData{VAOY, nTicksY * 4, {1.0f, 1.0f, 1.0f}, -1.0f, GL_LINES});
 
 }
 

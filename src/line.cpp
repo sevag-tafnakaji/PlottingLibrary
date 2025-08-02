@@ -40,5 +40,5 @@ RenderData Line::loadDataToBuffers(double xMin, double xMax, double yMin, double
     glEnableVertexAttribArray(0);
 
     // magic number are colours. TODO: Add colours later on.
-    return RenderData{VAO, dataSize, this->lineColour, mode};
+    return RenderData{VAO, dataSize, this->lineColour, -1.0f, mode};
 }

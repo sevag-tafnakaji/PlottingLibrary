@@ -21,7 +21,7 @@ int main()
         k.push_back(2 * curr_t * curr_t + 10);
     }
 
-    testPlot.scatter(t, k);
+    testPlot.scatter(t, k, 2.5f);
 
     testPlot.render();
 

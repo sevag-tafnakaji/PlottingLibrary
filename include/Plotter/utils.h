@@ -9,6 +9,7 @@ struct RenderData
     unsigned int VAO;
     int bufferSize;
     glm::vec3 colour;
+    float pointSize;
     GLenum mode;
 };
 
