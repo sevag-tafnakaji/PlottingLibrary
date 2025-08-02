@@ -60,8 +60,15 @@ set(sources
     include/Plotter/export.h
     include/Plotter/Plotter.h
     include/Plotter/data.h
+    include/Plotter/line.h
+    include/Plotter/resource_manager.h
+    include/Plotter/shader.h
+    include/Plotter/utils.h
     src/Plotter.cpp
     src/data.cpp
+    src/line.cpp
+    src/resource_manager.cpp
+    src/shader.cpp
     src/glad.c)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 

@@ -2,11 +2,11 @@
 
 layout (location = 0) in vec2 aPos;
 
-uniform mat4 model;         // position of model
-uniform mat4 view;          // position of camera 
-uniform mat4 projection;    // projection of scene to camera space
+uniform float offset_x;
+uniform float offset_y;
+uniform float scale;
 
 void main()
 {
-   gl_Position = projection * view * model * vec4(aPos.x, aPos.y, 0.0, 1.0);
+   gl_Position = vec4((aPos.x + offset_x) * scale, (aPos.y + offset_y) * scale, 0.0, 1.0);
 };

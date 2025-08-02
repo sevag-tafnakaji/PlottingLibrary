@@ -1,6 +1,7 @@
 #ifndef DATA_H
 #define DATA_H
 
+#include <iostream>
 #include <vector>
 #include <string>
 
@@ -37,6 +38,13 @@ public:
     void setX(std::vector<double> x) {X = x;}
 
     void setY(std::vector<double> y) {Y = y;}
+
+    int size() {return X.size();}
+
+    static double scalePoint(double raw, double oldMin, double oldMax, double newMin, double newMax);
+
+    static Data2D scaleData(Data2D data, double xMin, double xMax, double yMin, double yMax, 
+                    double minWidth, double maxWidth, double minHeight, double maxHeight);
 
 private:
     std::vector<double> X;
