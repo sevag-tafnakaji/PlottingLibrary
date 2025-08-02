@@ -70,6 +70,8 @@ void Plotter::render()
 
     auto start = std::chrono::high_resolution_clock::now();
 
+    glm::mat4 transform;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(this->window))
@@ -89,9 +91,9 @@ void Plotter::render()
         shader.Use();
 
         // Update zoom + pan with values from processInput
-        glUniform1f(glGetUniformLocation(shader.ID, "scale"), scale);
-        glUniform1f(glGetUniformLocation(shader.ID, "offset_x"), offset_x);
-        glUniform1f(glGetUniformLocation(shader.ID, "offset_y"), offset_y);
+        GLint transformLocation = glGetUniformLocation(shader.ID, "transform");
+        transform = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, 1.0f)), glm::vec3(offset_x, offset_y, 0.0f));
+        glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 
         // plot all of the active buffers
         for (RenderData renderBuffers : activeVAOs)
