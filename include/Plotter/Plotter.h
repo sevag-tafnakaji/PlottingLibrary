@@ -7,6 +7,7 @@
 #include <string>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/random.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -27,7 +28,7 @@ public:
 
     void render();
 
-    void plot(std::vector<double> x, std::vector<double> y);
+    void plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
 
 private:
     // settings

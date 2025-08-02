@@ -1,6 +1,7 @@
 #ifndef LINE_H
 #define LINE_H
 
+#include <glm/glm.hpp>
 #include <glad/glad.h>
 #include <Plotter/data.h>
 #include <Plotter/utils.h>
@@ -9,7 +10,7 @@ class Line
 {
 public:
     Line();
-    Line(std::vector<double> x, std::vector<double> y);
+    Line(std::vector<double> x, std::vector<double> y, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
     ~Line();
 
     void setData(std::vector<double> x, std::vector<double> y);
@@ -28,6 +29,8 @@ public:
 
 private:
     Data2D data;
+
+    glm::vec3 lineColour;
 
 };
 

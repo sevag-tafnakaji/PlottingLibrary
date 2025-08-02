@@ -50,9 +50,12 @@ void Plotter::init(std::string title, bool fullscreen)
     Shader PlotterShader = ResourceManager::LoadShader("../resources/shaders/plot.vs", "../resources/shaders/plot.fs", nullptr, "plotter");
 }
 
-void Plotter::plot(std::vector<double> x, std::vector<double> y)
+void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour)
 {
-    Line line(x, y);
+    if (glm::all(glm::equal(colour, {0.0f, 0.0f, 0.0f})))
+        colour = {glm::linearRand<float>(0, 1), glm::linearRand<float>(0, 1), glm::linearRand<float>(0, 1)};
+
+    Line line(x, y, colour);
 
     plotLines.push_back(line);
 }

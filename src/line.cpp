@@ -2,9 +2,10 @@
 
 Line::Line() {}
 
-Line::Line(std::vector<double> x, std::vector<double> y)
+Line::Line(std::vector<double> x, std::vector<double> y, glm::vec3 colour)
 {
     this->data.setData(x, y);
+    this->lineColour = colour;
 }
 
 Line::~Line() {}
@@ -45,5 +46,5 @@ RenderData Line::loadDataToBuffers(double xMin, double xMax, double yMin, double
     glEnableVertexAttribArray(0);
 
     // magic number are colours. TODO: Add colours later on.
-    return RenderData{VAO, dataSize, {0.8f, 0.8f, 0.8f}, mode};
+    return RenderData{VAO, dataSize, this->lineColour, mode};
 }
