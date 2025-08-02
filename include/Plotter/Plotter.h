@@ -17,6 +17,13 @@
 #include <Plotter/line.h>
 #include <Plotter/resource_manager.h>
 
+#define SCALE_VALUE 1.05
+#define OFFSET_X_VALUE 0.01
+
+#define FIGURE_MARGIN 20
+#define TICK_SIZE 10
+
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
 
@@ -59,6 +66,12 @@ private:
     void loadDataToBuffers();
 
     void updateBuffers(RenderData data);
+
+    glm::mat4 viewportTransform(float x, float y, float width, float height);
+
+    void plotAxes();
+
+    void plotTicks();
 };
 
 #endif  // WINDOW_H

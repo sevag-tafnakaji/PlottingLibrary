@@ -1,8 +1,5 @@
 #include <Plotter/Plotter.h>
 
-#define SCALE_VALUE 1.05
-#define OFFSET_X_VALUE 0.01
-
 float offset_x = 0.0f;
 float offset_y = 0.0f;
 float scale = 1.0f;
@@ -23,7 +20,6 @@ void Plotter::init(std::string title, bool fullscreen)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
     // glfw window creation
     // --------------------
     if (fullscreen)
@@ -46,6 +42,8 @@ void Plotter::init(std::string title, bool fullscreen)
         std::cout << "Failed to initialize GLAD" << std::endl;
         // TODO: Raise some custom failed init error
     }
+    glViewport(FIGURE_MARGIN + TICK_SIZE, FIGURE_MARGIN + TICK_SIZE, SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);
+    glDisable(GL_SCISSOR_TEST);
 
     Shader PlotterShader = ResourceManager::LoadShader("../resources/shaders/plot.vs", "../resources/shaders/plot.fs", nullptr, "plotter");
 }
@@ -67,6 +65,10 @@ void Plotter::render()
 
     // use the max x & y values to scale data of each line to [-0.5, 0.5], then store as RenderData struct
     loadDataToBuffers();
+
+    plotAxes();
+
+    plotTicks();
 
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -92,7 +94,11 @@ void Plotter::render()
 
         // Update zoom + pan with values from processInput
         GLint transformLocation = glGetUniformLocation(shader.ID, "transform");
-        transform = glm::translate(glm::scale(glm::mat4(1.0f), glm::vec3(scale, scale, 1.0f)), glm::vec3(offset_x, offset_y, 0.0f));
+        transform = viewportTransform(FIGURE_MARGIN + TICK_SIZE, 
+                                       FIGURE_MARGIN + TICK_SIZE, 
+                                       SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, 
+                                       SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);
+        
         glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
 
         // plot all of the active buffers
@@ -118,6 +124,140 @@ void Plotter::render()
 
         start = end;
     }
+}
+
+void Plotter::plotAxes()
+{
+    GLuint VBO, VAO;
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    float box[6] = {-1, 1, -1, -1, 1, -1};
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(VAO);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(box), box, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    updateBuffers(RenderData{VAO, 3, glm::vec3(1.0f, 1.0f, 1.0f), GL_LINE_STRIP});
+}
+
+// TODO: use generalised values instead of magic numbers
+void Plotter::plotTicks()
+{
+    float pixel_x = 2.0 / (SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE);
+    float pixel_y = 2.0 / (SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);
+
+    float tickSpacing = 0.05 * powf(10, -floor(log10(scale)));
+
+    /*
+    ---------------------
+    ------ x axis -------
+    ---------------------
+    */
+    float left = - 1.0 / scale - offset_x;
+    float right = 1.0 / scale - offset_x;
+
+    int leftI = ceil(left / tickSpacing);
+    int rightI = floor(right / tickSpacing);
+
+    float remX = leftI * tickSpacing - left;
+
+    float firstTickX = -1.0 + remX * scale;
+
+    int nTicksX = rightI - leftI + 1;
+
+    std::cout << "Num Ticks X: " << nTicksX << std::endl;
+
+    if (nTicksX > 41)
+        nTicksX = 41;
+
+    GLuint VBOX, VAOX;
+    glGenVertexArrays(1, &VAOX);
+    glGenBuffers(1, &VBOX);
+
+    float ticksX[nTicksX * 4];
+
+    int j = 0;
+    for(int i = 0; i < nTicksX * 4; i+=4)
+    {
+        float x = firstTickX + j * tickSpacing * scale;
+        // every 10th tick is a major tick - double size
+        float tickScale = ((j + leftI) % 10) ? 0.5 : 1;
+        ticksX[i] = x;
+        ticksX[i + 1] = -1;
+        ticksX[i + 2] = x;
+        ticksX[i + 3] = -1 - TICK_SIZE * tickScale * pixel_y;
+        j++;
+    }
+
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(VAOX);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBOX);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(ticksX), ticksX, GL_STREAM_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    // magic number are colours. TODO: Add colours later on.
+    updateBuffers(RenderData{VAOX, nTicksX * 4, {1.0f, 1.0f, 1.0f}, GL_LINES});
+
+    /*
+    ---------------------
+    ------ y axis -------
+    ---------------------
+    */
+    float down = - 1.0 / scale - offset_y;
+    float up = 1.0 / scale - offset_y;
+
+    int downI = ceil(down / tickSpacing);
+    int upI = floor(up / tickSpacing);
+
+    float remY = downI * tickSpacing - down;
+
+    float firstTickY = -1.0 + remY * scale;
+
+    int nTicksY = upI - downI + 1;
+
+    std::cout << "Num Ticks Y: " << nTicksY << std::endl;
+
+    if (nTicksY > 41)
+        nTicksY = 41;
+
+    GLuint VBOY, VAOY;
+    glGenVertexArrays(1, &VAOY);
+    glGenBuffers(1, &VBOY);
+
+    float ticksY[nTicksY * 4];
+
+    j = 0;
+    for(int i = 0; i < nTicksY * 4; i+=4)
+    {
+        float y = firstTickY + j * tickSpacing * scale;
+        // every 10th tick is a major tick - double size
+        float tickScale = ((j + downI) % 10) ? 0.5 : 1;
+        ticksY[i] = -1;
+        ticksY[i + 1] = y;
+        ticksY[i + 2] = -1 - TICK_SIZE * tickScale * pixel_x;
+        ticksY[i + 3] = y;
+        j++;
+    }
+
+    // bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
+    glBindVertexArray(VAOY);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBOY);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(ticksY), ticksY, GL_STREAM_DRAW);
+
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
+    updateBuffers(RenderData{VAOY, nTicksY * 4, {1.0f, 1.0f, 1.0f}, GL_LINES});
+
 }
 
 void Plotter::extractMinMaxValues()
@@ -166,6 +306,18 @@ Plotter::~Plotter()
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
+}
+
+glm::mat4 Plotter::viewportTransform(float x, float y, float width, float height) {
+  // Calculate how to translate the x and y coordinates:
+  float offset_x = (2.0 * x + (width - SCR_WIDTH)) / SCR_WIDTH;
+  float offset_y = (2.0 * y + (height - SCR_HEIGHT)) / SCR_HEIGHT;
+
+  // Calculate how to rescale the x and y coordinates:
+  float scale_x = width / SCR_WIDTH;
+  float scale_y = height / SCR_HEIGHT;
+
+  return glm::scale(glm::translate(glm::mat4(1), glm::vec3(offset_x, offset_y, 0)), glm::vec3(scale_x, scale_y, 1));
 }
 
 // // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -223,5 +375,6 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     // make sure the viewport matches the new window dimensions; note that width and
     // height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
+    // glViewport(0, 0, width, height);
+    glViewport(FIGURE_MARGIN + TICK_SIZE, FIGURE_MARGIN + TICK_SIZE, width - FIGURE_MARGIN * 2 - TICK_SIZE, height - FIGURE_MARGIN * 2 - TICK_SIZE);
 }
