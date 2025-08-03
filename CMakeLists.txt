@@ -67,6 +67,105 @@ set(sources
     include/Plotter/texture.h
     include/Plotter/stb_image.h
     include/Plotter/utils.h
+    # include/freetype/config/ftconfig.h
+    # include/freetype/config/ftheader.h
+    # include/freetype/config/ftmodule.h
+    # include/freetype/config/ftoption.h
+    # include/freetype/config/ftstdlib.h
+    # include/freetype/config/integer-types.h
+    # include/freetype/config/mac-support.h
+    # include/freetype/config/public-macros.h
+    # include/freetype/internal/services/svbdf.h
+    # include/freetype/internal/services/svcfftl.h
+    # include/freetype/internal/services/svcid.h
+    # include/freetype/internal/services/svfntfmt.h
+    # include/freetype/internal/services/svgldict.h
+    # include/freetype/internal/services/svgxval.h
+    # include/freetype/internal/services/svkern.h
+    # include/freetype/internal/services/svmetric.h
+    # include/freetype/internal/services/svmm.h
+    # include/freetype/internal/services/svotval.h
+    # include/freetype/internal/services/svpfr.h
+    # include/freetype/internal/services/svpostnm.h
+    # include/freetype/internal/services/svprop.h
+    # include/freetype/internal/services/svpscmap.h
+    # include/freetype/internal/services/svpsinfo.h
+    # include/freetype/internal/services/svsfnt.h
+    # include/freetype/internal/services/svttcmap.h
+    # include/freetype/internal/services/svtteng.h
+    # include/freetype/internal/services/svttglyf.h
+    # include/freetype/internal/services/svwinfnt.h
+    # include/freetype/internal/autohint.h
+    # include/freetype/internal/cffotypes.h
+    # include/freetype/internal/cfftypes.h
+    # include/freetype/internal/compiler-macros.h
+    # include/freetype/internal/ftcalc.h
+    # include/freetype/internal/ftdebug.h
+    # include/freetype/internal/ftdrv.h
+    # include/freetype/internal/ftgloadr.h
+    # include/freetype/internal/fthash.h
+    # include/freetype/internal/ftmemory.h
+    # include/freetype/internal/ftmmtypes.h
+    # include/freetype/internal/ftobjs.h
+    # include/freetype/internal/ftpsprop.h
+    # include/freetype/internal/ftrfork.h
+    # include/freetype/internal/ftserv.h
+    # include/freetype/internal/ftstream.h
+    # include/freetype/internal/fttrace.h
+    # include/freetype/internal/ftvalid.h
+    # include/freetype/internal/pshints.h
+    # include/freetype/internal/sfnt.h
+    # include/freetype/internal/svginterface.h
+    # include/freetype/internal/t1types.h
+    # include/freetype/internal/tttypes.h
+    # include/freetype/internal/wofftypes.h
+    # include/freetype/freetype.h
+    # include/freetype/ftadvanc.h
+    # include/freetype/ftbbox.h
+    # include/freetype/ftbdf.h
+    # include/freetype/ftbitmap.h
+    # include/freetype/ftbzip2.h
+    # include/freetype/ftcache.h
+    # include/freetype/ftchapters.h
+    # include/freetype/ftcid.h
+    # include/freetype/ftcolor.h
+    # include/freetype/ftdriver.h
+    # include/freetype/fterrdef.h
+    # include/freetype/fterrors.h
+    # include/freetype/ftfntfmt.h
+    # include/freetype/ftgasp.h
+    # include/freetype/ftglyph.h
+    # include/freetype/ftgxval.h
+    # include/freetype/ftgzip.h
+    # include/freetype/ftimage.h
+    # include/freetype/ftincrem.h
+    # include/freetype/ftlcdfil.h
+    # include/freetype/ftlist.h
+    # include/freetype/ftlogging.h
+    # include/freetype/ftlzw.h
+    # include/freetype/ftmac.h
+    # include/freetype/ftmm.h
+    # include/freetype/ftmodapi.h
+    # include/freetype/ftmoderr.h
+    # include/freetype/ftotval.h
+    # include/freetype/ftoutln.h
+    # include/freetype/ftparams.h
+    # include/freetype/ftpfr.h
+    # include/freetype/ftrender.h
+    # include/freetype/ftsizes.h
+    # include/freetype/ftsnames.h
+    # include/freetype/ftstroke.h
+    # include/freetype/ftsynth.h
+    # include/freetype/ftsystem.h
+    # include/freetype/fttrigon.h
+    # include/freetype/fttypes.h
+    # include/freetype/ftwinfnt.h
+    # include/freetype/otsvg.h
+    # include/freetype/t1tables.h
+    # include/freetype/ttnameid.h
+    # include/freetype/tttables.h
+    # include/freetype/tttags.h
+    # include/ft2build.h
     src/Plotter.cpp
     src/data.cpp
     src/line.cpp
@@ -92,7 +191,7 @@ target_include_directories(Plotter
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
         "$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>")
 
-target_link_libraries(Plotter PUBLIC glfw dl GL)
+target_link_libraries(Plotter PUBLIC glfw dl GL freetype)
 
 set_target_properties(Plotter PROPERTIES
     SOVERSION ${PROJECT_VERSION_MAJOR}

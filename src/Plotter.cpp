@@ -10,6 +10,7 @@ Plotter::Plotter(std::string title, bool fullscreen, int height, int width)
     this->SCR_HEIGHT = height;
 
     this->init(title, fullscreen);
+    this->initFont();
 }
 
 void Plotter::init(std::string title, bool fullscreen)
@@ -53,9 +54,79 @@ void Plotter::init(std::string title, bool fullscreen)
 
     ResourceManager::LoadShader("../resources/shaders/line.vs", "../resources/shaders/line.fs", nullptr, "linePlotter");
     ResourceManager::LoadShader("../resources/shaders/scatter.vs", "../resources/shaders/scatter.fs", nullptr, "scatterPlotter");
+    ResourceManager::LoadShader("../resources/shaders/text.vs", "../resources/shaders/text.fs", nullptr, "text");
 
     ResourceManager::LoadTexture("../resources/textures/cross.png", true, "cross");
     ResourceManager::LoadTexture("../resources/textures/circle.png", true, "circle");
+}
+
+void Plotter::initFont()
+{
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    FT_Library ft;
+    if (FT_Init_FreeType(&ft))
+        std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+    FT_Face face;
+    if (FT_New_Face(ft, "../resources/fonts/Lora-Regular.ttf", 0, &face))
+        std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+
+    FT_Set_Pixel_Sizes(face, 0, 48);
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+    // Load 128 ASCII character set
+    for (unsigned int c = 0; c < 128; c++)
+    {
+        // load character glyph
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
+        {
+            std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+            continue;
+        }
+        // generate texture
+        unsigned int texture;
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RED,
+            face->glyph->bitmap.width,
+            face->glyph->bitmap.rows,
+            0,
+            GL_RED,
+            GL_UNSIGNED_BYTE,
+            face->glyph->bitmap.buffer);
+        // set texture options
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        // now store character for later use
+        Character character{
+            texture,
+            glm::vec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+            glm::vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+            face->glyph->advance.x};
+        characters[c] = character;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(ft);
+
+    glGenVertexArrays(1, &textVAO);
+    glGenBuffers(1, &textVBO);
+    glBindVertexArray(textVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour)
@@ -144,6 +215,8 @@ void Plotter::render()
 
         glBindVertexArray(0);
 
+        renderText("This is a sample text 0123456789", -0.8f, -0.8f, 0.5f, {0.5f, 0.8f, 0.2f});
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(this->window);
@@ -157,6 +230,57 @@ void Plotter::render()
 
         start = end;
     }
+}
+
+void Plotter::renderText(std::string text, float x, float y, float scale, glm::vec3 colour)
+{
+    Shader textShader = ResourceManager::GetShader("text");
+    // activate necessary shader + texture + buffer
+    textShader.Use();
+
+    glUniform3f(glGetUniformLocation(textShader.ID, "textColor"), colour.x, colour.y, colour.z);
+    glActiveTexture(GL_TEXTURE0);
+    glBindVertexArray(textVAO);
+
+    // iterate through characters
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++)
+    {
+        Character ch = characters[*c];
+
+        float xPos = x + ch.Bearing[0] * scale / SCR_WIDTH;
+        float yPos = y - (ch.Size[1] - ch.Bearing[1]) * scale / SCR_HEIGHT;
+
+        float w = ch.Size[0] * scale / SCR_WIDTH;
+        float h = ch.Size[1] * scale / SCR_HEIGHT;
+
+        // update VBO for each character
+        float vertices[6][4] = {
+            {xPos, yPos + h, 0.0f, 0.0f},
+            {xPos, yPos, 0.0f, 1.0f},
+            {xPos + w, yPos, 1.0f, 1.0f},
+
+            {xPos, yPos + h, 0.0f, 0.0f},
+            {xPos + w, yPos, 1.0f, 1.0f},
+            {xPos + w, yPos + h, 1.0f, 0.0f}};
+
+        // render glyph texture over quad
+        glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+
+        // update VBO content
+        glBindBuffer(GL_ARRAY_BUFFER, textVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // render quad
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        // advance cursors for next glyph (advance is 1/64, hence bitshift of 2^6)
+        x += (ch.Advance >> 6) * scale / SCR_WIDTH;
+    }
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Plotter::plotAxes()
@@ -184,7 +308,7 @@ void Plotter::plotTicks()
     float pixel_x = 2.0 / (SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE);
     float pixel_y = 2.0 / (SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);
 
-    float tickSpacing = 0.05 * powf(10, -floor(log10(scale)));
+    float tickSpacing = 0.05 * powf(5, -floor(log10(scale)/log10(5)));
 
     /*
     ---------------------
@@ -219,7 +343,7 @@ void Plotter::plotTicks()
     {
         float x = firstTickX + j * tickSpacing * scale;
         // every 10th tick is a major tick - double size
-        float tickScale = ((j + leftI) % 10) ? 0.5 : 1;
+        float tickScale = ((j + leftI) % 5) ? 0.5 : 1;
         ticksX[i] = x;
         ticksX[i + 1] = -1;
         ticksX[i + 2] = x;
@@ -272,7 +396,7 @@ void Plotter::plotTicks()
     {
         float y = firstTickY + j * tickSpacing * scale;
         // every 10th tick is a major tick - double size
-        float tickScale = ((j + downI) % 10) ? 0.5 : 1;
+        float tickScale = ((j + downI) % 5) ? 0.5 : 1;
         ticksY[i] = -1;
         ticksY[i + 1] = y;
         ticksY[i + 2] = -1 - TICK_SIZE * tickScale * pixel_x;

@@ -15,4 +15,12 @@ struct RenderData
     Texture2D texture;
 };
 
+struct Character
+{
+    unsigned int TextureID;  // ID handle of the glyph texture
+    glm::vec2 Size;    // Size of glyph
+    glm::vec2 Bearing; // Offset from baseline to left/top of glyph
+    long int Advance;    // Offset to advance to next glyph (learn opengl says unsigned int, but that throws warnings)
+};
+
 #endif  // UTILS_H

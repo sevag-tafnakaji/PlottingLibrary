@@ -5,6 +5,7 @@
 #include <iostream>
 #include <chrono>
 #include <string>
+#include <map>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/random.hpp>
@@ -17,6 +18,8 @@
 #include <Plotter/line.h>
 #include <Plotter/scatter.h>
 #include <Plotter/resource_manager.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #define SCALE_VALUE 1.05
 #define OFFSET_X_VALUE 0.01
@@ -36,9 +39,13 @@ public:
 
     void render();
 
+    void renderText(std::string text, float x, float y, float scale, glm::vec3 colour);
+
     void plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
 
     void scatter(std::vector<double> x, std::vector<double> y, float pointSize = 1.0f, glm::vec3 colour = {0.0f, 0.0f, 0.0f}, std::string texture = "");
+
+    std::map<char, Character> characters;
 
 private:
     // settings
@@ -64,7 +71,13 @@ private:
     // only active VAOs + data related to drawing lines as desired
     std::vector<RenderData> activeVAOs;
     
+    // Text gets special VBO + VAO
+    unsigned int textVBO, textVAO;
+
+
     void init(std::string title, bool fullscreen);
+
+    void initFont();
 
     void extractMinMaxValues();
 
