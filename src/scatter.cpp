@@ -56,5 +56,5 @@ RenderData Scatter::loadDataToBuffers(double xMin, double xMax, double yMin, dou
     glEnableVertexAttribArray(0);
 
     // magic number are colours. TODO: Add colours later on.
-    return RenderData{VAO, dataSize, pointColour, pointSize, mode};
+    return RenderData{VAO, dataSize, pointColour, pointSize, mode, ResourceManager::GetTexture(pointTexture)};
 }

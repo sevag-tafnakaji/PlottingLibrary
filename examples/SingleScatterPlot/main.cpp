@@ -21,7 +21,7 @@ int main()
         k.push_back(2 * curr_t * curr_t + 10);
     }
 
-    testPlot.scatter(t, k, 1.0f, {1.0f, 1.0f, 1.0f}, "circle");
+    testPlot.scatter(t, k, 1.0f, {1.0f, 1.0f, 1.0f}, "cross");
 
     testPlot.render();
 

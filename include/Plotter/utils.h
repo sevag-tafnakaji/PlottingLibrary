@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
+#include <Plotter/texture.h>
 
 struct RenderData
 {
@@ -11,6 +12,7 @@ struct RenderData
     glm::vec3 colour;
     float pointSize;
     GLenum mode;
+    Texture2D texture;
 };
 
 #endif  // UTILS_H

@@ -128,7 +128,8 @@ void Plotter::render()
             {
                 Shader scatterShader = ResourceManager::GetShader("scatterPlotter");
                 scatterShader.Use();
-
+                if (renderBuffers.texture.Width != 0)
+                    renderBuffers.texture.Bind();
                 glUniformMatrix4fv(glGetUniformLocation(scatterShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transform)); 
                 glUniform1i(glGetUniformLocation(scatterShader.ID, "image"), 0); 
                 glUniform1f(glGetUniformLocation(scatterShader.ID, "pointSize"), renderBuffers.pointSize); 

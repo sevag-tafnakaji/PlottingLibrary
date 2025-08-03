@@ -1,7 +1,7 @@
 #include <Plotter/Plotter.h>
 #include <cmath>
 
-#define NUM_POINTS 200
+#define NUM_POINTS 50
 
 int main()
 {
@@ -29,9 +29,9 @@ int main()
         k3.push_back(y3);
     }
 
-    testPlot.scatter(t, k1);
-    testPlot.scatter(t, k2);
-    testPlot.scatter(t, k3);
+    testPlot.scatter(t, k1, 3.0f);
+    testPlot.scatter(t, k2, 1.0f, {1.0f, 1.0f, 1.0f}, "cross");
+    testPlot.scatter(t, k3, 1.0f, {1.0f, 1.0f, 1.0f}, "circle");
 
     testPlot.render();
 
