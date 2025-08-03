@@ -1,6 +1,6 @@
 #include <Plotter/Plotter.h>
 
-#define NUM_POINTS 200
+#define NUM_POINTS 50
 
 int main()
 {
@@ -21,7 +21,7 @@ int main()
         k.push_back(2 * curr_t * curr_t + 10);
     }
 
-    testPlot.scatter(t, k, 2.5f);
+    testPlot.scatter(t, k, 1.0f, {1.0f, 1.0f, 1.0f}, "circle");
 
     testPlot.render();
 

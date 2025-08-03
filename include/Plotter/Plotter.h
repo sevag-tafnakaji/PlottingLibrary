@@ -38,7 +38,7 @@ public:
 
     void plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
 
-    void scatter(std::vector<double> x, std::vector<double> y, float pointSize = 1.0f, glm::vec3 colour = {0.0f, 0.0f, 0.0f});
+    void scatter(std::vector<double> x, std::vector<double> y, float pointSize = 1.0f, glm::vec3 colour = {0.0f, 0.0f, 0.0f}, std::string texture = "");
 
 private:
     // settings

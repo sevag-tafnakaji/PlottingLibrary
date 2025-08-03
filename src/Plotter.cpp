@@ -45,11 +45,17 @@ void Plotter::init(std::string title, bool fullscreen)
     glViewport(FIGURE_MARGIN + TICK_SIZE, FIGURE_MARGIN + TICK_SIZE, SCR_WIDTH - FIGURE_MARGIN * 2 - TICK_SIZE, SCR_HEIGHT - FIGURE_MARGIN * 2 - TICK_SIZE);    
     glDisable(GL_SCISSOR_TEST);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glEnable(GL_POINT_SPRITE);
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
 
     ResourceManager::LoadShader("../resources/shaders/line.vs", "../resources/shaders/line.fs", nullptr, "linePlotter");
     ResourceManager::LoadShader("../resources/shaders/scatter.vs", "../resources/shaders/scatter.fs", nullptr, "scatterPlotter");
+
+    ResourceManager::LoadTexture("../resources/textures/cross.png", true, "cross");
+    ResourceManager::LoadTexture("../resources/textures/circle.png", true, "circle");
 }
 
 void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colour)
@@ -62,12 +68,12 @@ void Plotter::plot(std::vector<double> x, std::vector<double> y, glm::vec3 colou
     plotLines.push_back(line);
 }
 
-void Plotter::scatter(std::vector<double> x, std::vector<double> y, float pointSize, glm::vec3 colour)
+void Plotter::scatter(std::vector<double> x, std::vector<double> y, float pointSize, glm::vec3 colour, std::string texture)
 {
     if (glm::all(glm::equal(colour, {0.0f, 0.0f, 0.0f})))
         colour = {glm::linearRand<float>(0, 1), glm::linearRand<float>(0, 1), glm::linearRand<float>(0, 1)};
 
-    Scatter scatter(x, y, pointSize, colour);
+    Scatter scatter(x, y, pointSize, colour, texture);
 
     scatterPlots.push_back(scatter);
 }
@@ -124,6 +130,7 @@ void Plotter::render()
                 scatterShader.Use();
 
                 glUniformMatrix4fv(glGetUniformLocation(scatterShader.ID, "transform"), 1, GL_FALSE, glm::value_ptr(transform)); 
+                glUniform1i(glGetUniformLocation(scatterShader.ID, "image"), 0); 
                 glUniform1f(glGetUniformLocation(scatterShader.ID, "pointSize"), renderBuffers.pointSize); 
                 scatterShader.SetVector3f("colour", renderBuffers.colour, false);
             }
@@ -413,7 +420,7 @@ void processInput(GLFWwindow *window)
     {
         scale /= SCALE_VALUE;
     }
-    
+
     else if (glfwGetKey(window, GLFW_KEY_HOME) == GLFW_PRESS)
     {
         offset_x = 0.0f;

@@ -64,6 +64,8 @@ set(sources
     include/Plotter/scatter.h
     include/Plotter/resource_manager.h
     include/Plotter/shader.h
+    include/Plotter/texture.h
+    include/Plotter/stb_image.h
     include/Plotter/utils.h
     src/Plotter.cpp
     src/data.cpp
@@ -71,6 +73,8 @@ set(sources
     src/scatter.cpp
     src/resource_manager.cpp
     src/shader.cpp
+    src/texture.cpp
+    src/stb_image.cpp
     src/glad.c)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${sources})
 

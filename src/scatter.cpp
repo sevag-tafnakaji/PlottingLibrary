@@ -2,11 +2,12 @@
 
 Scatter::Scatter() {}
 
-Scatter::Scatter(std::vector<double> x, std::vector<double> y, float size, glm::vec3 colour)
+Scatter::Scatter(std::vector<double> x, std::vector<double> y, float size, glm::vec3 colour, std::string texture)
 {
     this->data.setData(x, y);
     pointSize = size;
     pointColour = colour;
+    pointTexture = texture;
 }
 
 Scatter::~Scatter() {}
@@ -26,8 +27,22 @@ RenderData Scatter::loadDataToBuffers(double xMin, double xMax, double yMin, dou
     float vertices[dataSize * 2];
     
     Data2D::convertToArray(scaledData, vertices);
+    
+    if (pointTexture.empty() && pointSize > 5.01f)
+    {
+        throw ConflictingSettings("scatter plot point size should not be larger than 5.0");
+    }
 
-    unsigned int VBO, VAO;
+    if (!pointTexture.empty())
+    {
+        Texture2D texture = ResourceManager::GetTexture(pointTexture);
+
+        texture.Bind();
+
+        pointSize = texture.Width;
+    }
+
+    unsigned int VBO, VAO;    
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
